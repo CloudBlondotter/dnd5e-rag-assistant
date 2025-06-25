@@ -18,11 +18,11 @@ ANSWER_PROMPT = ChatPromptTemplate.from_messages([
 - Si hay información histórica de sub-preguntas anteriores, úsala para enriquecer tu respuesta cuando sea relevante
 - **SOLO** usa información explícitamente presente en el CONTEXTO (incluyendo información histórica)
 - Si el contexto es insuficiente, declara: "La información proporcionada no es suficiente para responder esta pregunta"
-- **CITA OBLIGATORIAMENTE** las fuentes específicas. El contexto incluye información de fuente en formato [FUENTE: Libro, Página: X]. Cuando uses información específica, incluye la cita en formato: *(Fuente: Libro, Página: X)*
+- **CITA OBLIGATORIAMENTE** las fuentes específicas. Cuando uses información específica, incluye la cita en formato: *(Libro, Página: X)*
 
 **FORMATO DE RESPUESTA:**
 - Respuesta directa y precisa
-- Estructura clara con viñetas cuando sea apropiado
+- Estructura clara con viñetas o tablas cuando sea apropiado
 - Integra información histórica relevante de manera fluida
 - **INCLUYE CITAS** de fuente después de cada afirmación específica"""),
     
@@ -30,49 +30,27 @@ ANSWER_PROMPT = ChatPromptTemplate.from_messages([
 {context}
 
 PREGUNTA:
-{question}
+{query}
 
 RESPUESTA EXPERTA:""")
 ])
 
+
 # --- PROMPT PARA DESCOMPOSICIÓN SECUENCIAL ---
-DECOMPOSITION_PROMPT = ChatPromptTemplate.from_messages([
-    ("system", """# ROL Y PROPÓSITO
+DECOMPOSITION_PROMPT = ChatPromptTemplate.from_template("""Descompón esta pregunta de D&D 5e en subpreguntas simples y específicas. Usa 
+palabras clave para mejoras la extracción de documentos. NO añadas "D&D 5" o algo parecido ya que todas las consultas se asumen que son sobre eso.
 
-Eres un especialista en Dungeons & Dragons 5.ª edición y en sistemas RAG. Tu tarea es descomponer la PREGUNTA ORIGINAL en una lista enumerada de preguntas simples.
-La primera subpregunta debe responderse únicaente con el contexto que se va a recuperar con el motor de base de datos vectorial,
-aunque las siguientes subpreguntas que vayas a crear van a tener como informacion extra las subpreguntas anteriores junto con sus respuesta.
-Al final la combinación de las respuestas debe cubrir exhaustivamente la consulta original.
+REGLAS:
+- Una idea por subpregunta
+- Orden lógico (general → específico)
+- Usa términos oficiales de D&D 5e
+- Si la pregunta ya es simple, devuélvela sin cambios
+- Solo la lista numerada, sin explicaciones
 
-# PAUTAS
-
-1. **Atomicidad y especificidad**: Cada subpregunta debe centrarse en un único dato o regla concreta (p. ej.: «¿Cuál es el tiempo de lanzamiento del conjuro *Bola de Fuego*?»).
-
-2. **Secuencia lógica**: Ordena las subpreguntas de lo general a lo particular; si una depende de otra, colócala después.
-
-3. **Terminología oficial**: Usa siempre la nomenclatura oficial de D&D 5e (p. ej.: «Prueba de Característica», «Clase de Armadura», «Acción adicional»).
-
-4. **Autocontenida**: Si la PREGUNTA ORIGINAL ya es atómica y específica, devuélvela tal cual, sin numeración ni modificaciones.
-
-5. **Formato estricto**: Devuelve solo la lista numerada (o la pregunta única) sin introducciones ni explicaciones adicionales.
-
-6. **Palabras clave**: Incluye al menos un término clave del texto de la PREGUNTA ORIGINAL en cada subpregunta para potenciar la recuperación de documentos.
-
-7. **No duplicación**: No repitas conceptos; si un aspecto ya se cubre en una subpregunta anterior, no lo reformules.
-
-8. **Sin relleno**: Si no se te ocurre una subpregunta útil adicional, termina la lista.
-
-9. Intenta evitar añadir palabras genéricas que no aporten relevancia a la pregunta ya que entorpecen la recuperación de contexto.
-     
-10. Se asume que todas las preguntas son sobre D&D 5e, asi que no añadas eso a las preguntas.
-
-Lo más importante de todo, piensa paso por paso lo que vas a hacer."""),
-    
-    ("user", """PREGUNTA ORIGINAL:
-{question}
+PREGUNTA:
+{query}
 
 SUBPREGUNTAS:""")
-])
 
 # --- PROMPT PARA LA SÍNTESIS FINAL (DESPUÉS DE LA DESCOMPOSICIÓN) ---
 SYNTHESIS_PROMPT = ChatPromptTemplate.from_messages([
@@ -104,11 +82,7 @@ Tienes acceso a:
 10. Si un regla aplica a un grupo general pero no se especifica el de la pregunta en concreto, menciona la respuesta para el general
      y añade un comentario explicandolo
 # FORMATO DE RESPUESTA
-
-- **Respuesta Corta**: Comienza con una respuesta directa y concisa (máximo 2-3 líneas)
-- **Explicación Detallada**: Desarrolla la respuesta integrando toda la información relevante de manera fluida
-- **Estructura Pedagógica**: Organiza la información de lo general a lo específico
-- **Citas Precisas**: Incluye referencias específicas en formato *(Fuente: Libro, Página: X)* después de cada afirmación
+Dependiendo del tipo de consulta elige el formato óptimo de respuesta, añade tablas o listas de ser conveniente.
 
 # RESTRICCIONES
 
@@ -118,10 +92,10 @@ Tienes acceso a:
 - **OBLIGATORIO**: Cita la fuente de cada afirmación específica"""),
     
     ("user", """PREGUNTA ORIGINAL:
-{original_question}
+{original_query}
 
 RESPUESTAS DE SUB-PREGUNTAS:
-{subquestions}
+{subquerys}
 
 CONTEXTO:
 {context}

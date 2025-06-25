@@ -137,7 +137,7 @@ def process_normal_query(chains, prompt):
     with st.spinner("🔍 Recuperando información y generando respuesta..."):
         docs = chains["retriever"].invoke(prompt)
         context, sources = build_context_and_sources(docs)
-        answer = chains["answer_chain"].invoke({"context": context, "question": prompt})
+        answer = chains["answer_chain"].invoke({"context": context, "query": prompt})
         
     return answer, sources
 
@@ -149,7 +149,7 @@ def process_decomposition_query(chains, prompt):
     with st.status("🧠 Analizando y descomponiendo la pregunta...", expanded=True) as status:
         # 1. Generar TODAS las sub-preguntas primero
         st.write("Generando plan de consulta completo...")
-        sub_questions_text = chains["decomposition_chain"].invoke({"question": prompt})
+        sub_questions_text = chains["decomposition_chain"].invoke({"query": prompt})
         sub_questions = parse_sub_questions(sub_questions_text)
         
         # Si solo hay una pregunta, no hubo descomposición
@@ -178,7 +178,7 @@ def process_decomposition_query(chains, prompt):
             extended_context = context + historical_context
             sub_answer = chains["answer_chain"].invoke({
                 "context": extended_context, 
-                "question": sub_q
+                "query": sub_q
             })
             
             # Guardar la sub-pregunta y su respuesta
@@ -201,8 +201,8 @@ def process_decomposition_query(chains, prompt):
             accumulated_context += f"Sub-pregunta: {sub_q}\nRespuesta: {sub_a}\n\n"
         
         final_answer = chains["synthesis_chain"].invoke({
-            "original_question": prompt,
-            "subquestions": accumulated_context,
+            "original_query": prompt,
+            "subquerys": accumulated_context,
             "context": original_context
         })
         
