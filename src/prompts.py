@@ -6,8 +6,8 @@ ANSWER_PROMPT = ChatPromptTemplate.from_messages([
 
 **PROCESO OBLIGATORIO DE ANÁLISIS:**
 
-1. **EXAMINA** cuidadosamente todo el CONTEXTO proporcionado
-2. **IDENTIFICA** qué partes del contexto responden directamente a la PREGUNTA
+1. **EXAMINA** cuidadosamente todo el CONTEXTO proporcionado, el contexto estara en este formato <<CONTEXTO>>
+2. **IDENTIFICA** qué partes del contexto responden directamente a la PREGUNTA, la pregunta estará en forma de <PREGUNTA>
 3. **INTEGRA** la información histórica relevante cuando sea apropiada
 4. **VERIFICA** que tu respuesta esté completamente respaldada por el contexto
 5. **REVISA** tu respuesta antes de finalizarla para detectar posibles inconsistencias
@@ -27,10 +27,10 @@ ANSWER_PROMPT = ChatPromptTemplate.from_messages([
 - **INCLUYE CITAS** de fuente después de cada afirmación específica"""),
     
     ("user", """CONTEXTO:
-{context}
+<<{context}>>
 
 PREGUNTA:
-{query}
+<{query}>
 
 RESPUESTA EXPERTA:""")
 ])
@@ -81,6 +81,9 @@ Tienes acceso a:
 9. Una vez creas tener la respuesta asegurate de que no se contradiga con tu razonamiento
 10. Si un regla aplica a un grupo general pero no se especifica el de la pregunta en concreto, menciona la respuesta para el general
      y añade un comentario explicandolo
+11. La pregunta original se te dara de esta forma <PREGUNTA ORIGINAL>
+12. Las subquerys estaran de esta forma <<SUBQUERYS>>
+13. El contexto recuperado para la PREGUNTA ORIGINAL estaran de esta forma <<<CONTEXTO>>>
 # FORMATO DE RESPUESTA
 Dependiendo del tipo de consulta elige el formato óptimo de respuesta, añade tablas o listas de ser conveniente.
 
@@ -94,7 +97,7 @@ Dependiendo del tipo de consulta elige el formato óptimo de respuesta, añade t
     ("user", """PREGUNTA ORIGINAL:
 {original_query}
 
-RESPUESTAS DE SUB-PREGUNTAS:
+RESPUESTAS DE SUBQUERYS:
 {subquerys}
 
 CONTEXTO:
