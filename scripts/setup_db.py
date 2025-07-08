@@ -24,16 +24,14 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 try:
-    # ✅ CORRECCIÓN 1: Cambiar vector_final por vector_pipeline
     from vector_pipeline import (
         init_or_update,
         reset_database,
         get_database_stats,
         process_markdown_files,
         load_existing_database
-    )  # ✅ CORRECCIÓN 2: Añadir paréntesis de cierre
+    )
     
-    # ✅ CORRECCIÓN 3: Importar de config.py las rutas correctas
     from config import DATA_DIR, DB_DIR, PROJECT_ROOT
     
 except ImportError as e:
